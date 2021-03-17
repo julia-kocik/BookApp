@@ -11,7 +11,9 @@
     },
     class: {
       favoriteBook: '.favorite',
+      hidden: '.hidden',
     },
+    form: '.filters form',
   };
   
   const templates = {
@@ -22,6 +24,7 @@
   
   const allBooks = [];
   const favoriteBooks = [];
+  const filters = [];
  
   function render() {
     for(let book of dataSource.books) {
@@ -40,9 +43,9 @@
     
     bookContainer.addEventListener('dblclick', function(event) {
       event.preventDefault();
-      const clickedElement = event.target;
+      const clickedElement = event.target.offsetParent;
       //console.log(clickedElement);
-      if(clickedElement.offsetParent.classList.contains('.book__image')) {
+      if(clickedElement.classList.contains('.book__image')) {
         const id = clickedElement.getAttribute('data-id');
         if(!clickedElement.classList.contains(select.class.favoriteBook)) {
           clickedElement.classList.add(select.class.favoriteBook);
@@ -53,12 +56,44 @@
           favoriteBooks.splice(i);
         }
       }
-     
     });
+
+    const form = document.querySelector(select.form);
+    //console.log(form);
+    form.addEventListener('click', function(event) {
+      const clickedElement = event.target;
+      if(clickedElement.tagName === 'INPUT' && clickedElement.type === 'checkbox' && clickedElement.name ==='filter') {
+        if(clickedElement.checked) {
+          filters.push(clickedElement.value);
+          filterBooks();
+        } else {
+          const i = filters.indexOf(clickedElement.value);
+          filters.splice(i);
+          filterBooks();
+        }
+      }
+    });
+  }
+
+  function filterBooks() {
+    for(let book of dataSource.books) {
+      const bookToBeHidden = document.querySelector('.book__image[data-id="id-of-the-book-here"]');
+      let shouldBeHidden = false;
+      for(let filter of filters) {
+        if(!book.details[filter]) {
+          shouldBeHidden = true;
+          break;
+        }
+      }
+      if(shouldBeHidden){
+        bookToBeHidden.classList.add(select.class.hidden);
+      } else {
+        bookToBeHidden.classList.remove(select.class.hidden);
+      }
+    }
   }
 
   render();
   initActions();
-  console.log(favoriteBooks);
-
+  
 }
